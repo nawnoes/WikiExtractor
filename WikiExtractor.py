@@ -44,7 +44,6 @@ Each file contains several documents in Tanl document format:
     <doc id="" url="" title="">
         ...
         </doc>
-
 Usage:
   WikiExtractor.py [options]
 """
@@ -96,7 +95,7 @@ discardElements = set([
         'table', 'tr', 'td', 'th', 'caption',
         'form', 'input', 'select', 'option', 'textarea',
         'ul', 'li', 'ol', 'dl', 'dt', 'dd', 'menu', 'dir',
-        'ref', 'references', 'img', 'imagemap', 'source'
+        'ref', 'references', 'img', 'imagemap', 'source','pages'
         ])
 
 #=========================================================================
@@ -132,11 +131,12 @@ version = '2.5'
 ##    print(footer, file=out)
 
 def WikiDocumentSentences(out, id, title, tags, text):
-    url = get_url(id, prefix)
-    header = '\n{0}:{1}'.format(title, "|||".join(tags))
+    header = '\n{0}{1}'.format(title, "|||".join(tags))
     # Separate header from text with a newline.
     text = clean(text)
 
+    if text.isspace() or len(compact(text,structure=False))==0:
+        return
     out.reserve(len(header) + len(text))
     print(header, file=out)
     for line in compact(text, structure=False):
@@ -181,7 +181,7 @@ def normalizeTitle(title):
           # followed by optional whitespace that should be removed to get
           # the canonical page name
           # (e.g., "Category:  Births" should become "Category:Births").
-          title = ns + ":" + rest.capitalize()
+          title = ns + "\n" + rest.capitalize()
       else:
           # No namespace, just capitalize first letter.
       # If the part before the colon is not a known namespace, then we must
@@ -190,7 +190,7 @@ def normalizeTitle(title):
           # However, to get the canonical page name we must contract multiple
           # spaces into one, because
           # "3001:   The_Final_Odyssey" != "3001: The_Final_Odyssey".
-          title = prefix.capitalize() + ":" + optionalWhitespace + rest
+          title = prefix.capitalize() + "\n" + optionalWhitespace + rest
   else:
       # no namespace, just capitalize first letter
       title = title.capitalize();
@@ -364,7 +364,10 @@ def make_anchor_tag(match):
         return '<a href="%s">%s</a>' % (link, anchor)
     else:
         return anchor
-
+def clean_html(raw_html):
+  cleanr = re.compile('<.*?>')
+  cleantext = re.sub(cleanr, '', raw_html)
+  return cleantext
 def clean(text):
 
     # FIXME: templates should be expanded
@@ -442,6 +445,7 @@ def clean(text):
     text = preformatted.sub('', text)
 
     # Cleanup text
+    text = clean_html(text)
     text = text.replace('\t', ' ')
     text = spaces.sub(' ', text)
     text = dots.sub('...', text)
@@ -703,6 +707,7 @@ def main():
 
     parser = get_argparser()
     args = parser.parse_args()
+    args.infn = "/Volumes/My Passport for Mac/00_nlp/enwiki/enwiki.xml.bz2"
     keepSections = True
 
     compress = args.compress
@@ -758,3 +763,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    """
+    Usage
+    python3 WikiExtractor.py --infn "/Volumes/My Passport for Mac/00_nlp/enwiki/enwiki.xml.bz2"
+    """
