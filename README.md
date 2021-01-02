@@ -1,6 +1,6 @@
 # English Wikipedia Extractor
 영어 위키피디아 plain text를 얻기 위한 WikiExtractor
-- 💾Github: https://github.com/nawnoes/WikiExtractor
+
 ### 개선내용
 - [apertium/WikiExtractor](https://wiki.apertium.org/wiki/Wikipedia_Extractor)의 경우 문서의 제목 아래에 <pages\>와 같은 태그들이 보여 영어 위키피디아의 plain text를 얻는데 불편함이 있었다. 
 
